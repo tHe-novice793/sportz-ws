@@ -30,23 +30,25 @@ matchRouter.get("/", async (req, res) => {
 
     res.json({ data });
   } catch (e) {
-    req.status(500).josn({ error: "Failed to list matches" });
+    res.status(500).json({ error: "Failed to list matches" });
   }
   res.status(200).json({ message: "Matches List" });
 });
 
 matchRouter.post("/", async (req, res) => {
   const parsed = createMatchSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: "Invalid payload.",
+      details: JSON.stringify(parsed.error),
+    });
+  }
+
   const {
     data: { startTime, endTime, homeScore, awayScore },
   } = parsed;
 
-  if (!parsed.success) {
-    return res.status(400).json({
-      error: "Invalid paylaod.",
-      details: JSON.stringify(parsed.error),
-    });
-  }
   try {
     const [event] = await db
       .insert(matches)
@@ -59,6 +61,10 @@ matchRouter.post("/", async (req, res) => {
         status: getMatchStatus(startTime, endTime),
       })
       .returning();
+
+    if (res.app.locals.broadcastMatchCreated) {
+      res.app.locals.broadcastMatchCreated(event);
+    }
 
     res.status(201).json({ data: event });
   } catch (e) {
