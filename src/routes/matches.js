@@ -26,13 +26,13 @@ matchRouter.get("/", async (req, res) => {
     const data = await db
       .select()
       .from(matches)
+      .limit(limit)
       .orderBy(desc(matches.createdAt));
 
     res.json({ data });
   } catch (e) {
     res.status(500).json({ error: "Failed to list matches" });
   }
-  res.status(200).json({ message: "Matches List" });
 });
 
 matchRouter.post("/", async (req, res) => {

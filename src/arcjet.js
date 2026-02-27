@@ -51,6 +51,7 @@ export function securityMiddleware() {
         if (decision.reason.isRateLimit()) {
           return res.status(429).json({ error: "Too many requests." });
         }
+        console.log(decision.reason);
         return res.status(403).json({ error: "Forbidden" });
       }
     } catch (e) {
