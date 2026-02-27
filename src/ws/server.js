@@ -14,7 +14,6 @@ function subscribe(matchId, socket) {
     return { success: false, reason: "Subscription limit reached" };
   }
 
-n
   if (socket.subscriptions.has(matchId)) {
     return { success: true };
   }
@@ -177,7 +176,8 @@ export function attachWebSocketServer(server) {
     wss.clients.forEach((ws) => {
       if (ws.isAlive === false) {
         cleanupSubscriptions(ws);
-        return ws.terminate();
+        ws.terminate();
+        return;
       }
 
       ws.isAlive = false;

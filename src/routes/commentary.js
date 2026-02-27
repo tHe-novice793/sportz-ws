@@ -23,7 +23,7 @@ commentaryRouter.get("/", async (req, res) => {
   if (!queryResult.success) {
     return res
       .status(400)
-      .json({ error: "Invalid match ID.", details: queryResult.error.issues });
+      .json({ error: "Invalid query.", details: queryResult.error.issues });
   }
   try {
     const { id: matchId } = paramsResult.data;
@@ -73,7 +73,11 @@ commentaryRouter.post("/", async (req, res) => {
       .returning();
 
     if (res.app.locals.broadcastCommentary) {
-      res.app.locals.broadcastCommentary(result.matchId, result);
+      try {
+        res.app.locals.broadcastCommentary(result.matchId, result);
+      } catch (broadcastError) {
+        console.error("Failed to broadcast commentary:", broadcastError);
+      }
     }
 
     res.status(201).json({ data: result });
